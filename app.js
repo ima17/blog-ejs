@@ -1,5 +1,3 @@
-//jshint esversion:6
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
@@ -54,14 +52,17 @@ app.get("/compose", function (req, res) {
   res.render("compose");
 });
 
-app.get("/posts/:postName", function (req, res) {
-  requiredName = _.lowerCase(req.params.postName);
+app.get("/posts/:postId", function (req, res) {
+  const requestedPostId = req.params.postId;
 
-  posts.forEach(function (post) {
-    storedName = _.lowerCase(post.title);
-
-    if (storedName === requiredName) {
-      res.render("post", { title: post.title, content: post.content });
+  Post.findOne({ _id: requestedPostId }, function (err, foundPost) {
+    if (!err) {
+      res.render("post", {
+        title: foundPost.title,
+        content: foundPost.content,
+      });
+    } else {
+      console.log(err);
     }
   });
 });
@@ -72,7 +73,6 @@ app.post("/compose", function (req, res) {
     content: req.body.postBody,
   });
 
-  
   newPost.save(function (err) {
     if (!err) {
       res.redirect("/");
